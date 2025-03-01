@@ -1,0 +1,28 @@
+@Ventas_HostAddress = http://localhost:32772
+
+get {{Ventas_HostAddress}}/pedidos/
+Accept: application/json
+
+###
+
+POST {{Ventas_HostAddress}}/pedidos/
+Content-Type: application/json
+
+{
+  "clienteId": 1235,
+  "productos": [
+    {
+      "nombre": "Arroz 1kg",
+      "cantidad": 2
+    },
+    {
+      "nombre": "Aceite 1L",
+      "cantidad": 1
+    }
+  ]
+}
+
+### existe pedido
+
+GET {{Ventas_HostAddress}}/pedidos/1
+Accept: application/json

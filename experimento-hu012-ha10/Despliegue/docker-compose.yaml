@@ -1,0 +1,11 @@
+services:
+  dbventas:
+    image: postgres:15
+    container_name: dbventas
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ventas
+    ports:
+        - "5432:5432"
