@@ -1,0 +1,8 @@
+﻿################################################################################
+# Este archivo .gitignore ha sido creado automáticamente por Microsoft(R) Visual Studio.
+################################################################################
+
+*.sqlite
+/experimento-hu012-ha10/Despliegue/elastic_data/infra_elastic_data/_data/nodes/0
+/.vs/ProyectoIntegrador1/v17
+*.json
