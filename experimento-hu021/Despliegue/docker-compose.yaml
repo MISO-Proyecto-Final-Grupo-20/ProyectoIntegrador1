@@ -14,6 +14,14 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+  
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: redis-stack
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    restart: unless-stopped
 
   elasticsearch:
       image: elasticsearch:7.16.2

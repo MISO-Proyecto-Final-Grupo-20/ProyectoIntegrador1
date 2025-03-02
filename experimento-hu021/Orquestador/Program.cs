@@ -33,10 +33,17 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(Log.Logger);
 
 
+var redisUrl = Environment.GetEnvironmentVariable("REDIS_URL");
+
+if (string.IsNullOrEmpty(redisUrl))
+{
+    throw new InvalidOperationException("La variable de entorno 'REDIS_URL' no está definida.");
+}
+
 // Configurar MassTransit con RabbitMQ
 builder.Services.AddMassTransit(x =>
 {
-    x.AddSagaStateMachine<PedidoMachineState, PedidoState>().InMemoryRepository();
+    x.AddSagaStateMachine<PedidoMachineState, PedidoState>().RedisRepository(redisUrl);
     x.UsingRabbitMq((context, cfg) =>
     {
         var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "amqp://guest:guest@host.docker.internal:5672";
