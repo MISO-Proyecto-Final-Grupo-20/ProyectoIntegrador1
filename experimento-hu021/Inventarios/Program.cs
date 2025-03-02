@@ -1,5 +1,6 @@
 using Inventarios.Consumidores;
 using MassTransit;
+using Mensajes.Comunes;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -31,6 +32,12 @@ namespace Inventarios
                 {
                     cfg.Host(rabbitHost);
                     cfg.ConfigureEndpoints(context);
+                    cfg.UseMessageRetry(r =>
+                    {
+                        r.Handle<ExcepcionServicio>();
+                        r.Immediate(10); 
+                    });
+                    cfg.UseInMemoryOutbox(context);
                 });
             });
 

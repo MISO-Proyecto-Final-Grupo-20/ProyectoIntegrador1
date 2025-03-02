@@ -1,4 +1,5 @@
 ﻿using MassTransit;
+using Mensajes.Comunes;
 using Mensajes.Ventas;
 using Ventas.Constantes;
 using Ventas.Contextos;
@@ -18,6 +19,7 @@ public class ConsumidorConfirmarPedido : IConsumer<ConfirmarPedido>
 
     public async Task Consume(ConsumeContext<ConfirmarPedido> context)
     {
+        ChaosEngine.SimularFalloAleatorio(10);
         var pedido = await _dbContext.Pedidos.FindAsync(context.Message.IdPedido);
         pedido.Estado = EstadoPedido.CONFIRMADO;
         await _dbContext.SaveChangesAsync();

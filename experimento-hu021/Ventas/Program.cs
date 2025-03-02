@@ -45,6 +45,12 @@ namespace Ventas
                 {
                     cfg.Host(rabbitHost);
                     cfg.ConfigureEndpoints(context);
+                    cfg.UseMessageRetry(r =>
+                    {
+                        r.Handle<ExcepcionServicio>();
+                        r.Immediate(10);
+                    });
+                    cfg.UseInMemoryOutbox(context);
                 });
             });
 

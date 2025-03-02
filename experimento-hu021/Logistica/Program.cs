@@ -1,5 +1,6 @@
 using Logistica.Consumidores;
 using MassTransit;
+using Mensajes.Comunes;
 using Mensajes.Logistica;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -33,6 +34,12 @@ namespace Logistica
                 {
                     cfg.Host(rabbitHost);
                     cfg.ConfigureEndpoints(context);
+                    cfg.UseMessageRetry(r =>
+                    {
+                        r.Handle<ExcepcionServicio>();
+                        r.Immediate(10);
+                    });
+                    cfg.UseInMemoryOutbox(context);
                 });
             });
 
