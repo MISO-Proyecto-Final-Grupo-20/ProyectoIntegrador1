@@ -1,0 +1,122 @@
+# Archivos de compilación
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+*.nuget.cache
+*.nuget.props
+*.nuget.dgspec.json
+
+# Configuración de Visual Studio
+.vscode/
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.cache
+*.sln.ide
+*.swp
+*.lock.json
+
+# Archivos de Rider y JetBrains
+.idea/
+*.iml
+
+# Archivos de configuración y dependencias
+node_modules/
+wwwroot/node_modules/
+wwwroot/lib/
+bower_components/
+
+# Configuración de usuario
+*.psess
+*.psess
+*.userprefs
+*.ncrunch*
+*.gitattributes
+
+# Archivos de publicación y paquetes
+publish/
+dist/
+**/Properties/launchSettings.json
+*.Publish.xml
+*.pubxml
+*.pubxml.user
+.DS_Store
+
+# Archivos de logs y temporales
+logs/
+*.log
+!logs/keep.log
+*.bak
+*.swp
+*.swo
+*.tmp
+*.temp
+Thumbs.db
+
+# Archivos de bases de datos locales
+*.mdf
+*.ldf
+*.sqlite
+*.sqlite3
+*.db
+
+# Archivos de depuración
+*.vsp
+*.vspx
+*.trace
+*.tlog
+*.trx
+*.csproj.user
+*.rsuser
+*.dotCover
+TestResults/
+
+# Archivos de configuración de contenedores y cloud
+docker-compose.override.yml
+.env
+.env.local
+appsettings.Development.json
+appsettings.local.json
+
+# Paquetes y dependencias
+**/packages/
+*.nupkg
+.project.lock.json
+artifacts/
+.nuget/
+
+# Archivos generados de OpenAPI / Swagger
+swagger.json
+swagger.yaml
+
+# Archivos de lock de sistemas CI/CD
+*.lock
+.pnpm-debug.log
+
+# Archivos de análisis de código
+coverage/
+.coverage
+.coveragexml
+.coverage.json
+lcov-report/
+sonar/
+.ncrunchsolution
+.ncrunchproject
+
+# Archivos de cache de editor
+*.suo
+*.plist
+*.ipr
+*.iws
+*.orig
+
+# Configuración de herramientas de DevOps
+azure-pipelines.yml
+.github/
+.idea/
+.editorconfig
