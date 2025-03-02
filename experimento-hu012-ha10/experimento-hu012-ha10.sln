@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logistica", "Logistica\Logi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orquestador", "Orquestador\Orquestador.csproj", "{87F25B02-C26B-4008-B7ED-9F0D7EB4EF82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mensajes", "Mensajes\Mensajes.csproj", "{305B8F15-AF9D-4867-90A2-E63B4359B768}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{87F25B02-C26B-4008-B7ED-9F0D7EB4EF82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87F25B02-C26B-4008-B7ED-9F0D7EB4EF82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87F25B02-C26B-4008-B7ED-9F0D7EB4EF82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{305B8F15-AF9D-4867-90A2-E63B4359B768}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{305B8F15-AF9D-4867-90A2-E63B4359B768}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{305B8F15-AF9D-4867-90A2-E63B4359B768}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{305B8F15-AF9D-4867-90A2-E63B4359B768}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

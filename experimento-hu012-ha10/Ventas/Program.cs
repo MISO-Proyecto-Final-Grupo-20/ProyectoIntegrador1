@@ -1,7 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using System;
+using MassTransit;
+using Mensajes;
+using Mensajes.Comunes;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Ventas.Constantes;
+using Ventas.Consumidores;
 using Ventas.Contextos;
 using Ventas.Endpoints;
 using Ventas.Entidades;
@@ -14,11 +17,28 @@ namespace Ventas
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = Environment.GetEnvironmentVariable("connection_string");
+            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("La variable de entorno 'connection_string' no está definida.");
+                throw new InvalidOperationException("La variable de entorno 'CONNECTION_STRING' no está definida.");
             }
+
+            var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
+            if (string.IsNullOrEmpty(rabbitHost))
+            {
+                throw new InvalidOperationException("La variable de entorno 'RABBITMQ_HOST' no está definida.");
+            }
+            builder.Services.AddMassTransit(x =>
+            {
+                x.AddConsumers((typeof(ConsumidorConfirmarPedido).Assembly));
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitHost);
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -55,7 +75,7 @@ namespace Ventas
 
             });
 
-            app.MapPost("/pedidos", async (PedidoRequest solicitudPedido, ApplicationDbContext contexto) =>
+            _ = app.MapPost("/pedidos", async (PedidoRequest solicitudPedido, ApplicationDbContext contexto, IPublishEndpoint _publishEndpoint) =>
             {
                 var pedido = new Pedido
                 {
@@ -72,8 +92,16 @@ namespace Ventas
                 contexto.Pedidos.Add(pedido);
 
                 await contexto.SaveChangesAsync();
+                await ProcesarPedido(pedido, _publishEndpoint);
+
             });
             app.Run();
+        }
+
+        private  static async Task ProcesarPedido(Pedido pedido, IPublishEndpoint _publishEndpoint)
+        {
+            var mensajeProcesarPedido = new ProcesarPedido(Guid.NewGuid(),pedido.Id,pedido.DetallesPedido.Select( x => new ProductoPedido(x.Sku,x.Cantidad)).ToList());
+            await _publishEndpoint.Publish(mensajeProcesarPedido);
         }
     }
 }

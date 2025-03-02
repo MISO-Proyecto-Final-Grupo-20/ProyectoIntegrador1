@@ -9,3 +9,8 @@ services:
       POSTGRES_DB: ventas
     ports:
         - "5432:5432"
+  rabbitmq:
+    image: "rabbitmq:4-management"
+    ports:
+      - "15672:15672"
+      - "5672:5672"

@@ -4,12 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>4e3578b8-ee1c-4075-9f50-e05ae0d7c777</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,6 +19,10 @@
 
   <ItemGroup>
     <Folder Include="Constantes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mensajes\Mensajes.csproj" />
   </ItemGroup>
 
 </Project>
