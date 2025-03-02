@@ -14,3 +14,42 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+
+  elasticsearch:
+      image: elasticsearch:7.16.2
+      container_name: elasticsearch
+      ports: ['9200:9200']      
+      volumes: 
+        - ./elastic_data/infra_elastic_data/_data:/usr/share/elasticsearch/data          
+      environment:
+        - "discovery.type=single-node"
+        - xpack.security.enabled=true
+        - ELASTIC_PASSWORD=pass123
+  
+  kibana:
+      image: kibana:7.16.2
+      ports: ['5601:5601']
+      deploy:
+      environment:
+        - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+        - ELASTICSEARCH_USERNAME=elastic
+        - ELASTICSEARCH_PASSWORD=pass123
+      depends_on: 
+        - 'elasticsearch'
+
+  apm:
+      image: docker.elastic.co/apm/apm-server:7.16.2
+      cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+      cap_drop: ["ALL"]
+      container_name: apm-server
+      user: apm-server
+      command: --strict.perms=false
+
+      environment:
+          - setup.template.settings.index.number_of_replicas=0
+          - setup.kibana.host=kibana:5601
+      ports: ['8400:8200']
+      volumes:
+        - ./apm_conf/apm-server.yml:/usr/share/apm-server/apm-server.yml
+      depends_on: 
+          - 'elasticsearch'

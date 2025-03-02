@@ -1,6 +1,11 @@
 using Logistica.Consumidores;
 using MassTransit;
 using Mensajes.Logistica;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 namespace Logistica
 {
@@ -12,6 +17,8 @@ namespace Logistica
 
             // Add services to the container.
             builder.Services.AddAuthorization();
+
+            //Configurar masstransit
 
             var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
             if (string.IsNullOrEmpty(rabbitHost))
@@ -28,6 +35,72 @@ namespace Logistica
                     cfg.ConfigureEndpoints(context);
                 });
             });
+
+            // Confgurar serilog
+
+            var elasticUri = Environment.GetEnvironmentVariable("ELASTIC_URI");
+            if (string.IsNullOrEmpty(elasticUri))
+            {
+                throw new InvalidOperationException("La variable de entorno 'ELASTIC_URI' no está definida.");
+            }
+
+            const string serviceName = "Logistica";
+            builder.Host.UseSerilog((context, configuration) =>
+            {
+                var elasticUri = Environment.GetEnvironmentVariable("ELASTIC_URI") ??
+                                 "http://elastic:fenix123@host.docker.internal:9200";
+                configuration
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticUri))
+                    {
+                        IndexFormat = "applogs-{0:yyyy.MM}",
+                        AutoRegisterTemplate = true
+                    })
+                    .Enrich.WithProperty("Application", serviceName);
+            });
+
+            // Configurar OpenTelemetry
+
+            var elasticApm = Environment.GetEnvironmentVariable("ELASTIC_APM_URI");
+            if (string.IsNullOrEmpty(elasticApm))
+            {
+                throw new InvalidOperationException("La variable de entorno 'ELASTIC_APM_URI' no está definida.");
+            }
+
+            var resourceBuilder = ResourceBuilder.CreateDefault()
+                .AddService(serviceName)
+                .AddTelemetrySdk()
+                .AddContainerDetector()
+                .AddEnvironmentVariableDetector();
+
+            builder.Services.AddOpenTelemetry()
+                .WithTracing(tracerProviderBuilder =>
+                {
+                    tracerProviderBuilder
+                        .SetResourceBuilder(resourceBuilder)
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddSource("MassTransit")
+                        .AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(elasticApm);
+                        });
+                })
+                .WithMetrics(metricProviderBuilder =>
+                {
+                    metricProviderBuilder
+                        .SetResourceBuilder(resourceBuilder)
+                        .AddHttpClientInstrumentation()
+                        .AddAspNetCoreInstrumentation()
+                        .AddRuntimeInstrumentation()
+                        .AddProcessInstrumentation()
+                        .AddMeter("MassTransit")
+                        .AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(elasticApm);
+                        });
+                });
 
             var app = builder.Build();
 
