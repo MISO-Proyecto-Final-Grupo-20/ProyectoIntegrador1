@@ -13,22 +13,19 @@ services:
     image: "rabbitmq:4-management"
     ports:
       - "15672:15672"
-      - "5672:5672"
   
   redis-stack:
     image: redis/redis-stack:latest
     container_name: redis-stack
     ports:
-      - "6379:6379"
       - "8001:8001"
     restart: unless-stopped
 
   elasticsearch:
       image: elasticsearch:7.16.2
-      container_name: elasticsearch
-      ports: ['9200:9200']      
+      container_name: elasticsearch    
       volumes: 
-        - ./elastic_data/infra_elastic_data/_data:/usr/share/elasticsearch/data          
+        - ./Despliegue-exp2/elastic_data/infra_elastic_data/_data:/usr/share/elasticsearch/data          
       environment:
         - "discovery.type=single-node"
         - xpack.security.enabled=true
@@ -56,8 +53,50 @@ services:
       environment:
           - setup.template.settings.index.number_of_replicas=0
           - setup.kibana.host=kibana:5601
-      ports: ['8400:8200']
       volumes:
-        - ./apm_conf/apm-server.yml:/usr/share/apm-server/apm-server.yml
+        - ./Despliegue-exp2/apm_conf/apm-server.yml:/usr/share/apm-server/apm-server.yml
       depends_on: 
           - 'elasticsearch'
+  
+  inventarios:
+    build: 
+      context: .
+      dockerfile: Inventarios/Dockerfile
+    env_file:
+      - .env
+    depends_on: 
+        - 'rabbitmq'
+
+
+  logistica:
+    build:
+      context: .
+      dockerfile: Logistica/Dockerfile
+    env_file:
+      - .env
+    depends_on: 
+        - 'rabbitmq'
+
+
+  orquestador:
+    build: 
+      context: .
+      dockerfile: Orquestador/Dockerfile
+    env_file:
+      - .env
+    depends_on: 
+        - 'rabbitmq'
+        - 'redis-stack'
+
+
+  ventas:
+    build: 
+      context: .
+      dockerfile: Ventas/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - '8080:8080' 
+    depends_on: 
+          - 'dbventas'
+          - 'rabbitmq'
