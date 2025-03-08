@@ -1,0 +1,98 @@
+services:
+  dbventas:
+    image: postgres:15
+    container_name: dbventas
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ventas
+    ports:
+        - "5433:5432"
+  rabbitmq:
+    image: "rabbitmq:4-management"
+    ports:
+      - "15673:15672"
+  
+  elasticsearch:
+    image: elasticsearch:7.16.2
+    container_name: elasticsearch
+    volumes:
+      - ./Despliegue/elastic_data/infra_elastic_data/_data:/usr/share/elasticsearch/data
+    environment:
+      - "discovery.type=single-node"
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=pass123
+    deploy:
+      resources:
+        limits:
+          memory: "4GB"
+  
+  kibana:
+      image: kibana:7.16.2
+      ports: ['5602:5601']
+      deploy:
+      environment:
+        - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+        - ELASTICSEARCH_USERNAME=elastic
+        - ELASTICSEARCH_PASSWORD=pass123
+      depends_on: 
+        - 'elasticsearch'
+
+  apm:
+      image: docker.elastic.co/apm/apm-server:7.16.2
+      cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+      cap_drop: ["ALL"]
+      container_name: apm-server
+      user: apm-server
+      command: --strict.perms=false
+
+      environment:
+          - setup.template.settings.index.number_of_replicas=0
+          - setup.kibana.host=kibana:5601
+      volumes:
+        - ./Despliegue/apm_conf/apm-server.yml:/usr/share/apm-server/apm-server.yml
+      depends_on: 
+          - 'elasticsearch'
+  
+  inventarios:
+    build: 
+      context: .
+      dockerfile: Inventarios/Dockerfile
+    env_file:
+      - .env
+    depends_on: 
+        - 'rabbitmq'
+
+
+  logistica:
+    build:
+      context: .
+      dockerfile: Logistica/Dockerfile
+    env_file:
+      - .env
+    depends_on: 
+        - 'rabbitmq'
+
+
+  orquestador:
+    build: 
+      context: .
+      dockerfile: Orquestador/Dockerfile
+    env_file:
+      - .env
+    depends_on: 
+        - 'rabbitmq'
+
+
+  ventas:
+    build: 
+      context: .
+      dockerfile: Ventas/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - '8090:8080' 
+    depends_on: 
+          - 'dbventas'
+          - 'rabbitmq'

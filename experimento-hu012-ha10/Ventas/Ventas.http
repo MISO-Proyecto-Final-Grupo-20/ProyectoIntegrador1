@@ -1,4 +1,4 @@
-@Ventas_HostAddress = http://localhost:5054
+@Ventas_HostAddress = http://localhost:8090
 
 get {{Ventas_HostAddress}}/pedidos/
 Accept: application/json
