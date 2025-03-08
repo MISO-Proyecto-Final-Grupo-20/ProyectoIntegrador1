@@ -1,6 +1,6 @@
 ﻿namespace Mensajes.Comunes
 {
-    public static class ChaosEngine
+    public static class GeneradorFallas
     {
         private static readonly Random _random = new Random();
 
