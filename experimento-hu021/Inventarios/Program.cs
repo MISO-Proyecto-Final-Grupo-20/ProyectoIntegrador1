@@ -107,6 +107,22 @@ namespace Inventarios
                         });
                 });
 
+            builder.Services.AddOptions<ConfiguracionPruebasCaos>()
+                .Configure(options =>
+                {
+                    var porcentajeFalloEntorno = Environment.GetEnvironmentVariable("PORCENTAJE_FALLOS");
+
+                    if (!string.IsNullOrEmpty(porcentajeFalloEntorno) &&
+                        double.TryParse(porcentajeFalloEntorno, out var porcentajeFallo))
+                    {
+                        options.PorcentajeFallos = porcentajeFallo;
+                    }
+                    else
+                    {
+                        options.PorcentajeFallos = 0;
+                    }
+                });
+
             var app = builder.Build();
             app.UseAuthorization();
 
