@@ -1,5 +1,4 @@
 ﻿using MassTransit;
-using MassTransit.Configuration;
 using Mensajes.Comunes;
 using Mensajes.Ventas;
 using Microsoft.Extensions.Options;
