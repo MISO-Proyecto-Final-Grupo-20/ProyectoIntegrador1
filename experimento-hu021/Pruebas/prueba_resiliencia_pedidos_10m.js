@@ -4,12 +4,12 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 
 export let options = {
   stages: [
-    { duration: '1m', target: 10 }, // Aumentamos gradualmente a 10 VUs en 1 min
-    { duration: '5m', target: 10 }, // Mantenemos 10 VUs por 5 min
-    { duration: '1m', target: 0 },  // Reducimos a 0 VUs en 1 min
+    { duration: '1m', target: 100 },
+    { duration: '8m', target: 200 },
+    { duration: '1m', target: 0 }
   ],
   thresholds: {
-    'http_req_duration': ['p(95)<500'], // El 95% de las solicitudes deben tardar menos de 500ms
+    'http_req_duration': ['p(99)<500'], // El 99% de las solicitudes deben tardar menos de 500ms
     'http_req_failed': ['rate<0.01'], // Máximo 1% de fallos en comunicación
   },
 };
@@ -32,7 +32,7 @@ function getRandomProductos() {
 }
 
 export default function () {
-  const url = 'http://host.docker.internal:8080/pedidos/'; // Ajustado para Docker en Windows/macOS
+  const url = 'http://host.docker.internal:8080/pedidos/'; 
   const payload = JSON.stringify({
     clienteId: getRandomClienteId(),
     productos: getRandomProductos(),
@@ -53,6 +53,6 @@ export default function () {
 
 export function handleSummary(data) {
   return {
-    "resultados.html": htmlReport(data),
+    "prueba_resiliencia_pedidos_10m.html": htmlReport(data),
   };
 }
