@@ -30,6 +30,10 @@ services:
         - "discovery.type=single-node"
         - xpack.security.enabled=true
         - ELASTIC_PASSWORD=pass123
+      deploy:
+        resources:
+          limits:
+            memory: "4GB"
   
   kibana:
       image: kibana:7.16.2

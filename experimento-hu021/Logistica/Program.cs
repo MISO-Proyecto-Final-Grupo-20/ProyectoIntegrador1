@@ -24,7 +24,7 @@ namespace Logistica
             var rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
             if (string.IsNullOrEmpty(rabbitHost))
             {
-                throw new InvalidOperationException("La variable de entorno 'RABBITMQ_HOST' no está definida.");
+                throw new InvalidOperationException("La variable de entorno 'RABBITMQ_HOST' no estï¿½ definida.");
             }
 
             builder.Services.AddMassTransit(x =>
@@ -37,7 +37,7 @@ namespace Logistica
                     cfg.UseMessageRetry(r =>
                     {
                         r.Handle<ExcepcionServicio>();
-                        r.Immediate(10);
+                        r.Immediate(30);
                     });
                     cfg.UseInMemoryOutbox(context);
                 });
@@ -48,7 +48,7 @@ namespace Logistica
             var elasticUri = Environment.GetEnvironmentVariable("ELASTIC_URI");
             if (string.IsNullOrEmpty(elasticUri))
             {
-                throw new InvalidOperationException("La variable de entorno 'ELASTIC_URI' no está definida.");
+                throw new InvalidOperationException("La variable de entorno 'ELASTIC_URI' no estï¿½ definida.");
             }
 
             const string serviceName = "Logistica";
@@ -72,7 +72,7 @@ namespace Logistica
             var elasticApm = Environment.GetEnvironmentVariable("ELASTIC_APM_URI");
             if (string.IsNullOrEmpty(elasticApm))
             {
-                throw new InvalidOperationException("La variable de entorno 'ELASTIC_APM_URI' no está definida.");
+                throw new InvalidOperationException("La variable de entorno 'ELASTIC_APM_URI' no estï¿½ definida.");
             }
 
             var resourceBuilder = ResourceBuilder.CreateDefault()
