@@ -50,8 +50,8 @@ Los siguientes servicios están disponibles desde el **host**:
 |----------------|----------------|--------------------|
 | **Ventas API** | `8080:8080`     | `http://localhost:8080` |
 | **PostgreSQL** | `5432:5432`     | `postgres://postgres:postgres@localhost:5432/ventas` |
-| **Redis**      | `8001:8001`      | `redis-cli -h localhost -p 8001` |
-| **Kibana**     | `5601:5601`      | `http://localhost:5601` |
+| **Redis**      | `8001:8001`      | `http://localhost:8001` |
+| **Kibana**     | `5601:5601`      | `http://localhost:5601`  (usuario: elastic, contraseña: pass123)|
 | **RabbitMQ UI** | `15672:15672`   | `http://localhost:15672` (usuario: `guest`, contraseña: `guest`) |
 
 📌 **Importante**: Otros servicios como **Elasticsearch y APM Server** solo son accesibles dentro de los contenedores en la red interna de Docker.
