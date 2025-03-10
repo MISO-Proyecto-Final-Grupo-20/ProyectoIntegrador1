@@ -1,19 +1,20 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 
 export let options = {
   stages: [
-    { duration: '30s', target: 20 }, // Rampa de subida
-    { duration: '5m', target: 20 },  // Carga sostenida
+    { duration: '30s', target: 100 }, // Rampa de subida
+    { duration: '9m', target: 100 },  // Carga sostenida
     { duration: '30s', target: 0 },  // Rampa de bajada
   ],
   thresholds: {
-    http_req_duration: ['p(99)<1000'], // 95% de las solicitudes deben responder en <1s
+    http_req_duration: ['p(99)<1000'], // 99% de las solicitudes deben responder en <1s
   },
 };
 
 export default function () {
-  const url = 'http://host.docker.internal:5000/pedidos/'; // Ajusta la URL según tu entorno
+  const url = 'http://host.docker.internal:8090/pedidos/'; // Ajusta la URL según tu entorno
   const payload = JSON.stringify({
     clienteId: Math.floor(Math.random() * 10000),
     productos: [
@@ -31,4 +32,10 @@ export default function () {
   });
 
   sleep(1);
+}
+
+export function handleSummary(data) {
+  return {
+    "prueba_tiempo_respuesta_10m.html": htmlReport(data),
+  };
 }
