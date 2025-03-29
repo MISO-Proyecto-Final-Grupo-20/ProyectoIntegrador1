@@ -72,10 +72,14 @@ jobs:
         run: dotnet tool install --global dotnet-ef
 
       - name: Run dotnet db ensure created
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
         run: dotnet ef database update --project experimento-hu012-ha10/Ventas/Ventas.csproj --context ApplicationDbContext --connection "${{ secrets.CONNECTIONSTRINGS__VENTAS }}"
   
           
       - name: Test projects
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
         run: |
           for project in ${{ steps.find-csproj.outputs.projects }}; do
             if [[ "$project" == *Test* ]] || [[ "$project" == *Tests* ]]; then
