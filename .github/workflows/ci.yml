@@ -24,6 +24,20 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_PASSWORD }}
+        options: >-
+          --health-cmd "rabbitmqctl status"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -80,6 +94,9 @@ jobs:
       - name: Test projects
         env:
           CONNECTION_STRING: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
+          RABBITMQ_HOST: localhost
+          ELASTIC_URI: http://localhost:9200
+          ELASTIC_APM_URI: http://localhost:8200
         run: |
           for project in ${{ steps.find-csproj.outputs.projects }}; do
             if [[ "$project" == *Test* ]] || [[ "$project" == *Tests* ]]; then
