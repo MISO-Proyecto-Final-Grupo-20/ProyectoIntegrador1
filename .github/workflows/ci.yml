@@ -88,6 +88,7 @@ jobs:
       - name: Run dotnet db ensure created
         env:
           CONNECTION_STRING: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
+          RABBITMQ_HOST: localhost
         run: dotnet ef database update --project experimento-hu012-ha10/Ventas/Ventas.csproj --context ApplicationDbContext --connection "${{ secrets.CONNECTIONSTRINGS__VENTAS }}"
   
           
