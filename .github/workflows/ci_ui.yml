@@ -27,9 +27,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'ui/app/package-lock.json'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
 
       - name: Build
         run: npm run build -- --configuration=production
