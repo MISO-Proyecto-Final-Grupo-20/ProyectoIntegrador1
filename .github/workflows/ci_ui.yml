@@ -43,11 +43,12 @@ jobs:
       - name: Build
         run: npm run build -- --configuration=production
 
-      - name: Create junit directory
-        run: mkdir -p junit
-        
-      - name: Set permissions for junit directory
-        run: chmod -R 777 junit
+      - name: Prepare junit directory
+        run: |
+          echo "Preparing junit directory..."
+          rm -rf junit
+          mkdir -p junit
+          chmod -R 777 junit
 
       - name: Run tests
         run: |
@@ -87,10 +88,7 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: |
-            ui/app/junit/**/*.xml
-            ui/app/junit/*.xml
-            ui/app/*.xml
+          path: 'ui/app/junit/test-results.xml'
           if-no-files-found: warn
           retention-days: 7
 
@@ -98,12 +96,9 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: |
-            ui/app/junit/**/*.xml
-            ui/app/junit/*.xml
-            ui/app/*.xml
+          report_paths: 'ui/app/junit/test-results.xml'
           fail_on_failure: false
-          require_tests: false
+          require_tests: true
           check_name: 'UI Test Results'
 
       - name: Archive build
