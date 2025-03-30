@@ -37,9 +37,10 @@ module.exports = function (config) {
       ]
     },
     junitReporter: {
-      outputDir: '',
+      outputDir: require('path').join(__dirname, './junit'),
       outputFile: 'test-results.xml',
-      useBrowserName: false
+      useBrowserName: false,
+      xmlVersion: 1
     },
     reporters: ['progress', 'kjhtml', 'junit'],
     port: 9876,
