@@ -2,6 +2,9 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 module.exports = function (config) {
+  // Check for CI environment
+  const isCI = process.env.CI === 'true';
+
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -34,18 +37,15 @@ module.exports = function (config) {
       ]
     },
     junitReporter: {
-      outputDir: './test-results',
+      outputDir: '',
       outputFile: 'test-results.xml',
-      useBrowserName: false,
-      classNameFormatter: (browser, result) => {
-        return result.suite.join(' › ');
-      }
+      useBrowserName: false
     },
     reporters: ['progress', 'kjhtml', 'junit'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+    autoWatch: !isCI,
     browsers: ['Chrome', 'ChromeHeadless'],
     customLaunchers: {
       ChromeHeadless: {
@@ -58,7 +58,7 @@ module.exports = function (config) {
         ]
       }
     },
-    singleRun: false,
-    restartOnFileChange: true
+    singleRun: isCI,
+    restartOnFileChange: !isCI
   });
 };

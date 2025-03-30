@@ -47,37 +47,46 @@ jobs:
       - name: Test with detailed output
         run: |
           echo "Running tests with JUnit reporter..."
-          npm run test:ci || {
-            echo "Tests failed, but continuing pipeline to collect reports"
-            echo "Test directory contents:"
-            ls -la test-results/ || echo "test-results directory not found or empty"
-          }
+          npm run test:ci
+        continue-on-error: true
 
-      - name: List test results files
+      - name: Debug file system
         if: always()
         run: |
-          echo "Checking for test result files..."
-          find . -name "*.xml" | grep -i test
-          echo "Test results directory content:"
-          ls -la test-results/ || echo "test-results directory not found or empty"
+          echo "Current directory structure:"
+          pwd
+          find . -type d -maxdepth 3
+          
+          echo -e "\nSearching for any XML files:"
+          find . -name "*.xml" || echo "No XML files found"
+          
+          echo -e "\nListing test-results directory (if exists):"
+          if [ -d "test-results" ]; then
+            ls -la test-results/
+          else
+            echo "test-results directory not found"
+          fi
+          
+          echo -e "\nChecking for files in current directory:"
+          ls -la
 
-      - name: Upload test results
+      - name: Upload test results (from root)
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
-          path: ui/app/test-results/
+          name: test-results-root
+          path: ui/app/*.xml
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v4
+      - name: Upload test results (from test-results dir)
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          report_paths: 'ui/app/test-results/**/*.xml'
-          fail_on_failure: false
-          require_tests: false
-          check_name: 'UI Test Results'
+          name: test-results-dir
+          path: ui/app/test-results/
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Archive build
         if: success()
