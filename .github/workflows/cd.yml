@@ -1,0 +1,57 @@
+name: "Build and Push Docker Images"
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_all:
+        description: 'Build all services regardless of changes'
+        type: boolean
+        required: false
+        default: false
+  push:
+    branches: 
+      - main
+      - master
+      - release/*
+
+env:
+  CONNECTIONSTRINGS__VENTAS: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
+  RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/${{ github.event.repository.name }}
+  ELASTIC_URI: ${{ secrets.ELASTIC_URI }}
+  ELASTIC_APM_URI: ${{ secrets.ELASTIC_APM_URI }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build_all: ${{ steps.set-build-all.outputs.should_build_all }}
+      ventas-service: ${{ steps.set-build-all.outputs.should_build_all == 'true' || steps.filter.outputs.ventas-service }}
+    
+    steps:
+      - name: Set build all flag
+        id: set-build-all
+        shell: bash
+        run: |
+          BUILD_ALL="${{ github.event.inputs.build_all }}"
+          if [ "$BUILD_ALL" = "true" ]; then
+            echo "should_build_all=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build_all=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            ventas-service:
+              - 'experimento-hu012-ha10/Ventas/**'
+              - 'experimento-hu012-ha10/Ventas/Dockerfile'
+              - 'experimento-hu012-ha10/docker-compose.yaml'
