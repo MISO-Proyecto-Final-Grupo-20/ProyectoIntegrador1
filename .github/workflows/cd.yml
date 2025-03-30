@@ -88,8 +88,8 @@ jobs:
         if: needs.detect-changes.outputs.ventas-service == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./experimento-hu012-ha10/Ventas/Dockerfile
+          context: ./experimento-hu012-ha10
+          file: /Ventas/Dockerfile
           platforms: linux/amd64
           push: true
           provenance: false
