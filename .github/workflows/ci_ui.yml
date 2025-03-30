@@ -49,19 +49,31 @@ jobs:
       - name: Test with detailed output
         run: |
           echo "Running tests with JUnit reporter..."
-          CI=true npm run test:ci
+          export CI=true
+          npm run test:ci
         continue-on-error: true
 
       - name: Debug file system
         if: always()
         run: |
           echo "Current directory structure:"
-          pwd
-          echo "Junit directory (if exists):"
+          find . -type d -maxdepth 2
+          
+          echo -e "\nJunit directory (if exists):"
           ls -la junit/ || echo "junit directory not found or empty"
           
-          echo "Searching for any XML files recursively:"
+          echo -e "\nSearching for any XML files recursively:"
           find . -name "*.xml" || echo "No XML files found"
+          
+          if [ -f "test-results.xml" ]; then
+            echo -e "\nFound test-results.xml in current directory"
+            cat test-results.xml | head -20
+          fi
+          
+          if [ -f "junit/test-results.xml" ]; then
+            echo -e "\nFound test-results.xml in junit directory"
+            cat junit/test-results.xml | head -20
+          fi
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -70,7 +82,8 @@ jobs:
           name: test-results
           path: |
             ui/app/junit/**/*.xml
-            ui/app/**/*.xml
+            ui/app/junit/*.xml
+            ui/app/*.xml
           if-no-files-found: warn
           retention-days: 7
 
@@ -79,8 +92,9 @@ jobs:
         if: always()
         with:
           report_paths: |
-            **/junit/**/*.xml
-            **/*.xml
+            ui/app/junit/**/*.xml
+            ui/app/junit/*.xml
+            ui/app/*.xml
           fail_on_failure: false
           require_tests: false
           check_name: 'UI Test Results'
