@@ -34,7 +34,7 @@ module.exports = function (config) {
       ]
     },
     junitReporter: {
-      outputDir: './test-results/',
+      outputDir: './test-results',
       outputFile: 'test-results.xml',
       useBrowserName: false,
       classNameFormatter: (browser, result) => {
