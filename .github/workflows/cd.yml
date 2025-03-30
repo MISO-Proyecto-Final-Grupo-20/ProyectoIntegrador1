@@ -89,7 +89,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./experimento-hu012-ha10
-          file: ./Ventas/Dockerfile
+          file: ./experimento-hu012-ha10/Ventas/Dockerfile
           platforms: linux/amd64
           push: true
           provenance: false
