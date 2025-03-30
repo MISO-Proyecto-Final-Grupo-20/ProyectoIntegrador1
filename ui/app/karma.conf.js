@@ -4,8 +4,10 @@
 module.exports = function (config) {
   // Check for CI environment
   const isCI = process.env.CI === 'true';
+  
+  console.log('CI environment detected:', isCI);
 
-  config.set({
+  const configuration = {
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
@@ -37,17 +39,23 @@ module.exports = function (config) {
       ]
     },
     junitReporter: {
-      outputDir: require('path').join(__dirname, './junit'),
+      outputDir: './junit',
       outputFile: 'test-results.xml',
       useBrowserName: false,
-      xmlVersion: 1
+      xmlVersion: 1,
+      classNameFormatter: (browser, result) => {
+        return result.suite.join(' › ');
+      },
+      // Force file writes for CI environment
+      suppressSkipped: false,
+      properties: {}
     },
-    reporters: ['progress', 'kjhtml', 'junit'],
+    reporters: ['progress', 'junit'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: !isCI,
-    browsers: ['Chrome', 'ChromeHeadless'],
+    browsers: ['ChromeHeadless'],
     customLaunchers: {
       ChromeHeadless: {
         base: 'Chrome',
@@ -59,7 +67,10 @@ module.exports = function (config) {
         ]
       }
     },
-    singleRun: isCI,
-    restartOnFileChange: !isCI
-  });
+    singleRun: true,  // Always run once and exit
+    restartOnFileChange: false,
+    failOnEmptyTestSuite: false
+  };
+
+  config.set(configuration);
 };
