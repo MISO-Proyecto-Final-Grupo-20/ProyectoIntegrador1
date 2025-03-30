@@ -45,13 +45,20 @@ jobs:
 
       - name: Create junit directory
         run: mkdir -p junit
+        
+      - name: Set permissions for junit directory
+        run: chmod -R 777 junit
 
-      - name: Test with detailed output
+      - name: Run tests
         run: |
-          echo "Running tests with JUnit reporter..."
-          export CI=true
-          npm run test:ci
-        continue-on-error: true
+          echo "Running tests..."
+          npm test -- --no-watch --no-progress --browsers=ChromeHeadless
+        continue-on-error: false
+
+      - name: Generate JUnit report
+        run: |
+          echo "Generating JUnit report..."
+          node generate-junit-report.js
 
       - name: Debug file system
         if: always()

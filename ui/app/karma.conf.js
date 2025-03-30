@@ -48,9 +48,10 @@ module.exports = function (config) {
       },
       // Force file writes for CI environment
       suppressSkipped: false,
-      properties: {}
+      properties: {},
+      terminal: true
     },
-    reporters: ['progress', 'junit'],
+    reporters: isCI ? ['progress', 'junit'] : ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
