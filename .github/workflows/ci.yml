@@ -6,14 +6,127 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  id-token: write
 
-    steps:
-    - uses: actions/checkout@v3
+jobs:
+  build:
+    runs-on: ubuntu-latest
     
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 9.0.x
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER: postgres
+          POSTGRES_DB: ventas
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_PASSWORD }}
+        options: >-
+          --health-cmd "rabbitmqctl status"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be fully operational..."
+          until pg_isready -h localhost -U postgres
+          do
+            echo "PostgreSQL is still initializing. Waiting..."
+            sleep 5
+          done
+          echo "PostgreSQL is now operational."
+          
+      - name: Setup .Net Core 9.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 9.0.x
+          
+      - name: Find all csproj files
+        id: find-csproj
+        shell: bash
+        run: |
+          echo "projects=$(find . -name "*.csproj" | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          
+      - name: Restore dependencies
+        run: |
+          for project in ${{ steps.find-csproj.outputs.projects }}; do
+            echo "Restoring dependencies for $project"
+            dotnet restore "$project"
+          done
+          
+      - name: Build projects
+        run: |
+          for project in ${{ steps.find-csproj.outputs.projects }}; do
+            echo "Building $project"
+            dotnet build "$project" --configuration Release --no-restore
+          done
+
+
+      - name: install dotnet tool ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Run dotnet db ensure created
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
+          RABBITMQ_HOST: localhost
+          ELASTIC_URI: http://localhost:9200
+          ELASTIC_APM_URI: http://localhost:8200
+        run: dotnet ef database update --project experimento-hu012-ha10/Ventas/Ventas.csproj --context ApplicationDbContext --connection "${{ secrets.CONNECTIONSTRINGS__VENTAS }}"
+  
+          
+      - name: Test projects
+        env:
+          CONNECTION_STRING: ${{ secrets.CONNECTIONSTRINGS__VENTAS }}
+          RABBITMQ_HOST: localhost
+          ELASTIC_URI: http://localhost:9200
+          ELASTIC_APM_URI: http://localhost:8200
+        run: |
+          for project in ${{ steps.find-csproj.outputs.projects }}; do
+            if [[ "$project" == *Test* ]] || [[ "$project" == *Tests* ]]; then
+              echo "Testing $project"
+              project_name=$(basename "$project" .csproj)
+              mkdir -p TestResults
+              dotnet test "$project" --configuration Release --no-build --no-restore --logger "trx;LogFileName=TestResults/${project_name}.trx"
+            fi
+          done
+
+      - name: List test results
+        if: always()
+        run: |
+          echo "Test results files:"
+          find . -name "*.trx" | sort
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: 'Unit Tests'
+          path: '**/TestResults/*.trx'
+          reporter: 'dotnet-trx'
+          fail-on-error: false

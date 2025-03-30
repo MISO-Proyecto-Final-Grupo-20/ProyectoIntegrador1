@@ -1,4 +1,4 @@
-name: UI Build and Test
+name: UI CI Pipeline
 
 on:
   push:
@@ -14,18 +14,97 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      CI: true
 
     defaults:
       run:
         working-directory: ui/app
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: 'ui/app/package-lock.json'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'ui/app/package-lock.json'
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build -- --configuration=production
+
+      - name: Prepare junit directory
+        run: |
+          echo "Preparing junit directory..."
+          rm -rf junit
+          mkdir -p junit
+          chmod -R 777 junit
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          npm test -- --no-watch --no-progress --browsers=ChromeHeadless
+        continue-on-error: false
+
+      - name: Generate JUnit report
+        run: |
+          echo "Generating JUnit report..."
+          node generate-junit-report.js
+
+      - name: Debug file system
+        if: always()
+        run: |
+          echo "Current directory structure:"
+          find . -type d -maxdepth 2
+          
+          echo -e "\nJunit directory (if exists):"
+          ls -la junit/ || echo "junit directory not found or empty"
+          
+          echo -e "\nSearching for any XML files recursively:"
+          find . -name "*.xml" || echo "No XML files found"
+          
+          if [ -f "test-results.xml" ]; then
+            echo -e "\nFound test-results.xml in current directory"
+            cat test-results.xml | head -20
+          fi
+          
+          if [ -f "junit/test-results.xml" ]; then
+            echo -e "\nFound test-results.xml in junit directory"
+            cat junit/test-results.xml | head -20
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: 'ui/app/junit/test-results.xml'
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: 'ui/app/junit/test-results.xml'
+          fail_on_failure: false
+          require_tests: true
+          check_name: 'UI Test Results'
+
+      - name: Archive build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-build
+          path: ui/app/dist/
+          retention-days: 7

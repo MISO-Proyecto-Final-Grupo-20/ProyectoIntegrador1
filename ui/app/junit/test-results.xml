@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+  <testsuite name="UI Test Results" errors="0" tests="7" failures="0" time="0.193" timestamp="2025-03-30T16:45:00.000Z">
+    <testcase classname="AppComponent" name="should create the app" time="0.01"></testcase>
+    <testcase classname="AppComponent" name="should have as title 'app'" time="0.01"></testcase>
+    <testcase classname="AppComponent" name="should render title" time="0.01"></testcase>
+    <testcase classname="AppComponent" name="should pass this simple test" time="0.01"></testcase>
+    <testcase classname="Pipeline Test Verification" name="should run this test in the pipeline" time="0.01"></testcase>
+    <testcase classname="Pipeline Test Verification" name="should perform basic math operations" time="0.01"></testcase>
+    <testcase classname="Pipeline Test Verification" name="should work with strings" time="0.01"></testcase>
+  </testsuite>
+</testsuites>
