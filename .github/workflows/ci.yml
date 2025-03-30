@@ -110,14 +110,23 @@ jobs:
           for project in ${{ steps.find-csproj.outputs.projects }}; do
             if [[ "$project" == *Test* ]] || [[ "$project" == *Tests* ]]; then
               echo "Testing $project"
-              dotnet test "$project" --configuration Release --no-build --no-restore --logger "trx;LogFileName=test-results.xml"
+              project_name=$(basename "$project" .csproj)
+              mkdir -p TestResults
+              dotnet test "$project" --configuration Release --no-build --no-restore --logger "trx;LogFileName=TestResults/${project_name}.trx"
             fi
           done
+
+      - name: List test results
+        if: always()
+        run: |
+          echo "Test results files:"
+          find . -name "*.trx" | sort
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
         if: always()
         with:
           name: 'Unit Tests'
-          path: '**/test-results.xml'
+          path: '**/TestResults/*.trx'
           reporter: 'dotnet-trx'
+          fail-on-error: false
