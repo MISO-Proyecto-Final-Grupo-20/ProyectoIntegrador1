@@ -13,3 +13,8 @@
 /experimento-hu021/Despliegue-exp2/elastic_data/infra_elastic_data/_data/nodes/0
 /experimento-hu021/experimento-hu021/elastic_data/infra_elastic_data/_data/nodes/0
 *.sqlite-journal
+
+
+# Node.js Tools for Visual Studio
+.ntvs_analysis.dat
+node_modules/
