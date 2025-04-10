@@ -5,7 +5,6 @@
 *.sqlite
 /experimento-hu012-ha10/Despliegue/elastic_data/infra_elastic_data/_data/nodes/0
 /.vs/ProyectoIntegrador1/v17
-*.json
 /.vs/ProyectoIntegrador1
 /experimento-hu021/.vs/experimento-hu021
 /experimento-hu021/.vs/ProjectEvaluation
@@ -13,3 +12,8 @@
 /experimento-hu021/Despliegue-exp2/elastic_data/infra_elastic_data/_data/nodes/0
 /experimento-hu021/experimento-hu021/elastic_data/infra_elastic_data/_data/nodes/0
 *.sqlite-journal
+
+
+# Node.js Tools for Visual Studio
+.ntvs_analysis.dat
+node_modules/
